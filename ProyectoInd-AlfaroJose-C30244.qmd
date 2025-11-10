@@ -49,3 +49,92 @@ medallas[c(29604,31073,31092,31111), ] #Filas corregidas
 
 ```
 
+## Medallas a nivel historico
+
+En este apartado se analiza cómo ha cambiado la cantidad de medallas ganadas por los países a lo largo de los años. Para simplificar el análisis, se considerarán únicamente los diez países con mayor número total de medallas.
+
+# Medallas total por pais
+
+```{r}
+medallas_por_pais<- medallas %>% 
+  group_by(Country) %>% 
+  summarise(cantidad_total=n()) %>% 
+  arrange(desc(cantidad_total))
+  
+top_10<- head(medallas_por_pais, 10)
+top_10
+
+theme_set(theme_minimal())
+
+ggplot(top_10, aes(x=reorder(Country,cantidad_total),y=cantidad_total,fill = Country))+
+  geom_col(show.legend = FALSE)+
+  coord_flip()+
+  labs(title = "Top 10 paises con mas medallas",
+       x="Pais",
+       y="Numero de medallas")
+
+```
+
+# Medallas totales de cada pais por tipo
+
+```{r}
+
+medallas_por_tipo<- medallas %>% 
+  group_by(Medal=factor(Medal,levels = c("Gold","Silver","Bronze")),Country) %>% 
+  summarise(cantidad=n()) %>% 
+  ungroup() %>% 
+  arrange(Country,Medal)
+head(medallas_por_tipo,6)
+
+medallas_por_tipo %>% 
+  filter(Country%in%top_10$Country)
+
+  
+```
+
+# Medallas de USA a lo largo del tiempo
+
+```{r}
+
+evo_USA<- medallas %>% 
+  filter(Country=="USA") %>%
+  group_by(Year) %>% 
+  summarise(cantidad=n())
+ 
+evo_USA
+
+ggplot(evo_USA, aes(x=Year, y= cantidad))+
+  geom_line()+
+  geom_point()+
+  labs(title = "Evolucion de medallas USA",
+       x="Año",
+       y="Numero de medallas")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+medallas_por_deporte<- medallas %>% 
+  group_by(Discipline) %>% 
+  summarise(cantidad=n()) %>% 
+  arrange(desc(cantidad))
+top_deportes <- head(medallas_por_deporte,10)
+top_deportes
+
+ggplot(top_deportes,aes(x=reorder(Discipline,cantidad),y=cantidad,fill = Discipline))+
+  geom_col(show.legend = FALSE)+
+  coord_flip()+
+  labs(title = "Top 10 deportes con mas medallas",
+       x="Deporte",
+       y="Medallas")
+```
+

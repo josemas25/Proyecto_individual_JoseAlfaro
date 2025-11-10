@@ -1,0 +1,16 @@
+---
+title: "Evolución de las medallas olímpicas"
+author: "Jose Alfaro S C30244"
+format: html
+editor: visual
+---
+
+##Librerias
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+
+```
+

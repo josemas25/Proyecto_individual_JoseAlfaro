@@ -14,3 +14,38 @@ library(ggplot2)
 
 ```
 
+## Limpieza y correccion de datos
+
+```{r}
+medallas <- read_csv("summer.csv")
+
+glimpse(medallas)
+
+medallas <- medallas %>% 
+  mutate(Country=ifelse(Country=="URS","RUS",Country))#unificar nombre URS y RUS para el analisis
+
+medallas %>% 
+  filter(if_any(everything(),is.na)) #valores NA
+
+medallas %>% 
+  filter(Athlete=="Pending") #Nombres faltantes
+
+#Corregir nombres faltantes y paises NA
+
+medallas %>% 
+  filter(if_any(everything(),is.na)) %>% 
+  mutate(Fila=which(is.na(medallas$Country))) #filas en la que esta cada NA
+
+medallas$Athlete[29604] <- "Jamal, Maryam"
+medallas$Country[29604] <- "BRN"
+medallas$Athlete[31073] <- "Girard, Christine"
+medallas$Country[31073] <- "CAN"
+medallas$Athlete[31092] <- "KIM, Min-jae"
+medallas$Country[31092] <- "KOR"
+medallas$Country[31111] <- "RUS"
+
+medallas[c(29604,31073,31092,31111), ] #Filas corregidas
+
+
+```
+

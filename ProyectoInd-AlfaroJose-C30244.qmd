@@ -112,11 +112,56 @@ ggplot(evo_USA, aes(x=Year, y= cantidad))+
 
 ```
 
+# Comparacion de paises a nivel historico
 
+```{r}
+paises <- c("USA","RUS","GBR","FRA","GER")
 
+evo_paises <- medallas %>% 
+  filter(Country %in% paises) %>% 
+  group_by(Country,Year) %>% 
+  summarise(cantidad=n()) %>% 
+  ungroup()
+evo_paises
 
+ggplot(evo_paises,aes(x=Year,y= cantidad, color=Country))+
+  geom_line(linewidth = 1.5)+
+  geom_point(size= 2.5)+
+  labs(title = "Evolucion historica top 5 paises",
+       x= "Año",
+       y="Numero de medallas",
+       color="Pais")
+  
+```
+Analisis
+# Analisis temporal de medallas
 
+```{r}
+medallas_20años <- medallas %>% 
+  mutate(Periodo=paste0(floor((Year-1896)/20)*20+1896,"-",floor((Year-1896)/20)*20+1915))
 
+ranking_20años <- medallas_20años %>% 
+  group_by(Periodo,Country) %>% 
+  summarise(cantidad=n()) %>% 
+  ungroup() 
+
+top5_20años <- ranking_20años %>% 
+  group_by(Periodo) %>% 
+  slice_max(cantidad,n=5)
+top5_20años
+
+ggplot(top5_20años, aes(x=reorder(Country,cantidad),y=cantidad, fill = Country))+
+  geom_col(show.legend = FALSE)+
+  coord_flip()+
+  facet_wrap(~Periodo,scales="free_y")+
+  labs(title = "Top 5 paises por periodo de 20 años",
+       x="Pais",
+       y="Medallas")
+  
+
+```
+
+Analisis:
 
 
 

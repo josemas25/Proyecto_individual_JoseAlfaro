@@ -1,5 +1,5 @@
 ---
-title: "Evolución de las medallas olímpicas"
+title: "Evolución de las medallas olímpicas (1896-2014)"
 author: "Jose Alfaro S C30244"
 format: html
 editor: visual
@@ -17,12 +17,9 @@ library(ggplot2)
 ## Limpieza y correccion de datos
 
 ```{r}
-medallas <- read_csv("summer.csv")
+medallas <- read_csv("../data/summer.csv")
 
 glimpse(medallas)
-
-medallas <- medallas %>% 
-  mutate(Country=ifelse(Country=="URS","RUS",Country))#unificar nombre URS y RUS para el analisis
 
 medallas %>% 
   filter(if_any(everything(),is.na)) #valores NA
@@ -53,7 +50,7 @@ medallas[c(29604,31073,31092,31111), ] #Filas corregidas
 
 En este apartado se analiza cómo ha cambiado la cantidad de medallas ganadas por los países a lo largo de los años. Para simplificar el análisis, se considerarán únicamente los diez países con mayor número total de medallas.
 
-# Medallas total por pais
+### Medallas total por pais
 
 ```{r}
 medallas_por_pais<- medallas %>% 
@@ -75,7 +72,7 @@ ggplot(top_10, aes(x=reorder(Country,cantidad_total),y=cantidad_total,fill = Cou
 
 ```
 
-# Medallas totales de cada pais por tipo
+### Medallas totales de cada pais por tipo
 
 ```{r}
 
@@ -92,49 +89,7 @@ medallas_por_tipo %>%
   
 ```
 
-# Medallas de USA a lo largo del tiempo
-
-```{r}
-
-evo_USA<- medallas %>% 
-  filter(Country=="USA") %>%
-  group_by(Year) %>% 
-  summarise(cantidad=n())
- 
-evo_USA
-
-ggplot(evo_USA, aes(x=Year, y= cantidad))+
-  geom_line()+
-  geom_point()+
-  labs(title = "Evolucion de medallas USA",
-       x="Año",
-       y="Numero de medallas")
-
-```
-
-# Comparacion de paises a nivel historico
-
-```{r}
-paises <- c("USA","RUS","GBR","FRA","GER")
-
-evo_paises <- medallas %>% 
-  filter(Country %in% paises) %>% 
-  group_by(Country,Year) %>% 
-  summarise(cantidad=n()) %>% 
-  ungroup()
-evo_paises
-
-ggplot(evo_paises,aes(x=Year,y= cantidad, color=Country))+
-  geom_line(linewidth = 1.5)+
-  geom_point(size= 2.5)+
-  labs(title = "Evolucion historica top 5 paises",
-       x= "Año",
-       y="Numero de medallas",
-       color="Pais")
-  
-```
-Analisis
-# Analisis temporal de medallas
+### Analisis temporal de medallas
 
 ```{r}
 medallas_20años <- medallas %>% 
@@ -161,11 +116,87 @@ ggplot(top5_20años, aes(x=reorder(Country,cantidad),y=cantidad, fill = Country)
 
 ```
 
-Analisis:
+### Medallas de USA a lo largo del tiempo
+
+```{r}
+
+evo_USA<- medallas %>% 
+  filter(Country=="USA") %>%
+  group_by(Year) %>% 
+  summarise(cantidad=n())
+ 
+evo_USA
+
+ggplot(evo_USA, aes(x=Year, y= cantidad))+
+  geom_line()+
+  geom_point()+
+  labs(title = "Evolucion de medallas USA",
+       x="Año",
+       y="Numero de medallas")
+
+```
+
+### Comparacion de paises a nivel historico
+```{r}
+paises <- c("USA","GBR","FRA","SWE","GER")
+
+evo_paises <- medallas %>% 
+  filter(Country %in% paises) %>% 
+  group_by(Country,Year) %>% 
+  summarise(cantidad=n()) %>% 
+  ungroup()
+evo_paises
+
+ggplot(evo_paises,aes(x=Year,y= cantidad, color=Country))+
+  geom_line(linewidth = 1.5)+
+  geom_point(size= 2)+
+  facet_wrap(~Country,scales="free_y")+
+  labs(title = "Evolucion historica top 5 paises",
+       x= "Año",
+       y="Numero de medallas",
+       color="Pais")
+
+ggplot(evo_paises,aes(x=Year,y= cantidad, color=Country))+
+  geom_line(linewidth = 1.5)+
+  geom_point(size= 2.5)+
+  labs(title = "Evolucion historica top 5 paises",
+       x= "Año",
+       y="Numero de medallas",
+       color="Pais")
+
+```
+
+```{r}
+paises2 <- c("USA","RUS","AUS","CHN","GER","URS")
+
+evo_paises2 <- medallas %>% 
+  filter(Country %in% paises2) %>% 
+  group_by(Country,Year) %>% 
+  summarise(cantidad=n()) %>% 
+  ungroup()
+evo_paises2
+
+ggplot(evo_paises2,aes(x=Year,y= cantidad, color=Country))+
+  geom_line(linewidth = 1.5)+
+  geom_point(size= 2)+
+  facet_wrap(~Country,scales="free_y")+
+  labs(title = "Evolucion historica top 5 paises",
+       x= "Año",
+       y="Numero de medallas",
+       color="Pais")
+
+ggplot(evo_paises2,aes(x=Year,y= cantidad, color=Country))+
+  geom_line(linewidth = 1.5)+
+  geom_point(size= 2.5)+
+  labs(title = "Evolucion historica top 5 paises",
+       x= "Año",
+       y="Numero de medallas",
+       color="Pais")
+  
+```
 
 
-
-
+## Especializacion por deporte
 
 ```{r}
 medallas_por_deporte<- medallas %>% 
@@ -183,3 +214,155 @@ ggplot(top_deportes,aes(x=reorder(Discipline,cantidad),y=cantidad,fill = Discipl
        y="Medallas")
 ```
 
+### Los 3 mejores deportes de cada país
+
+```{r}
+top3_deportes_pais <- medallas %>% 
+  group_by(Country,Discipline) %>% 
+  summarise(cantidad= n()) %>%
+  ungroup() %>% 
+  arrange(Country,desc(cantidad)) %>% 
+  group_by(Country) %>% 
+  slice_head(n=3)
+
+top3_deportes_pais %>% 
+  filter(Country %in% c("USA","RUS","GBR","FRA","GER"))
+
+top3_deportes_pais %>% 
+  filter(Country %in% c("USA","RUS","GBR","FRA","GER")) %>% 
+  ggplot(aes(x= reorder(Discipline,cantidad),y=cantidad,fill= Discipline ))+
+  geom_col(show.legend = FALSE)+
+  coord_flip()+
+  facet_wrap(~Country,scales="free_y")+
+  labs(title = "Top 3 deportes por pais",
+       x="Deporte",
+       y="Medallas")
+  
+  
+```
+
+### Efecto de país anfitrión
+
+El dataframe no cuenta con una variable que diga en que papís fué la competencia.Por lo tanto, hay que crear una nueva variable Anfitrion
+
+```{r}
+
+medallas <- medallas %>% 
+  mutate(
+    Anfitrion = case_when(
+      Year == 1896 ~ "GRE",   # Atenas
+      Year == 1900 ~ "FRA",   # París
+      Year == 1904 ~ "USA",   # St. Louis
+      Year == 1908 ~ "GBR",   # Londres
+      Year == 1912 ~ "SWE",   # Estocolmo
+      Year == 1920 ~ "BEL",   # Amberes
+      Year == 1924 ~ "FRA",   # París
+      Year == 1928 ~ "NED",   # Ámsterdam
+      Year == 1932 ~ "USA",   # Los Ángeles
+      Year == 1936 ~ "GER",   # Berlín
+      Year == 1948 ~ "GBR",   # Londres
+      Year == 1952 ~ "FIN",   # Helsinki
+      Year == 1956 ~ "AUS",   # Melbourne
+      Year == 1960 ~ "ITA",   # Roma
+      Year == 1964 ~ "JPN",   # Tokio
+      Year == 1968 ~ "MEX",   # Ciudad de México
+      Year == 1972 ~ "GER",   # Múnich
+      Year == 1976 ~ "CAN",   # Montreal
+      Year == 1980 ~ "URS",   # Moscú
+      Year == 1984 ~ "USA",   # Los Ángeles
+      Year == 1988 ~ "KOR",   # Seúl
+      Year == 1992 ~ "ESP",   # Barcelona
+      Year == 1996 ~ "USA",   # Atlanta
+      Year == 2000 ~ "AUS",   # Sídney
+      Year == 2004 ~ "GRE",   # Atenas
+      Year == 2008 ~ "CHN",   # Pekín
+      Year == 2012 ~ "GBR",   # Londres
+      TRUE ~ NA_character_
+    )
+  )
+
+
+```
+
+```{r}
+
+medallas_por_año <- medallas %>% 
+  group_by(Country,Year,Anfitrion) %>% 
+  summarise(medallas=n()) %>% 
+  ungroup() %>% 
+  mutate(Es_Anfitrion= ifelse(Country==Anfitrion,1,0))
+
+efecto_anfitrion <- medallas_por_año %>% 
+  group_by(Country) %>% 
+  summarise(promedio_anfitrion=mean(medallas[Es_Anfitrion==1]),
+            promedio_no_anfitrion=mean(medallas[Es_Anfitrion==0])) %>% 
+  mutate(diferencia= promedio_anfitrion-promedio_no_anfitrion) %>% 
+  filter(!is.na(promedio_anfitrion)) %>% 
+  arrange(desc(diferencia))
+efecto_anfitrion
+
+ggplot(efecto_anfitrion,aes(x=reorder(Country,diferencia),y=diferencia,fill=diferencia >0))+
+  geom_col(show.legend = FALSE)+
+  coord_flip()+
+  labs(title = "Cambio en numero de medallas al ser pais anfitrion",
+       x="Pais",
+       y="Diferencia")
+
+```
+
+
+Para calcular la correlaccion entre ser anfitrion y ganar mas medallas vamos usar la correlacion de Pearson
+
+```{r}
+
+pearson_por_pais <- medallas_por_año %>%
+  group_by(Country) %>%
+  filter(Country%in%efecto_anfitrion$Country) %>%   # solo paises que hayan sido anfitriones
+  summarise(
+    cor_anfitrion = cor(Es_Anfitrion, medallas, method = "pearson")
+  ) %>%
+  arrange(desc(cor_anfitrion))
+
+pearson_por_pais
+
+## Pearson general de los paises que alguna vez fueron anfitriones
+
+medallas_por_año %>% 
+  filter(Country %in% efecto_anfitrion$Country) %>% 
+  summarise(cor_general=cor(Es_Anfitrion,medallas,method = "pearson"))
+
+```
+Bibliografia:
+R Core Team. (2023). cor: Correlation matrices. In R Documentation.
+https://stat.ethz.ch/R-manual/R-patched/library/stats/html/cor.html
+
+
+## Evolucion por sexo
+
+```{r}
+medallas_por_sexo <- medallas %>% 
+  group_by(Year,Gender) %>% 
+  summarise(cantidad=n()) %>% 
+  ungroup() %>% 
+  arrange(desc(cantidad))
+
+ggplot(medallas_por_sexo, aes(x= Year,y=cantidad,color=Gender))+
+  geom_line(linewidth = 1.5)+
+  geom_point(size=2.5)+
+  labs(title = "Evolucion de participacion por sexo",
+       x="Año",
+       y="Medallas",
+       color="Sexo")
+
+medallas_por_sexo %>% 
+  group_by(Year) %>% 
+  mutate(proporcion=cantidad/sum(cantidad)) %>% 
+  ggplot(aes(x=Year,y=proporcion,color=Gender))+
+  geom_line(linewidth = 1.5)+
+  labs(title = "Proporcion de medallas femeninas y masculinas",
+       x="Año",
+       y="Propocion",
+       color="Sexo")
+
+
+```
